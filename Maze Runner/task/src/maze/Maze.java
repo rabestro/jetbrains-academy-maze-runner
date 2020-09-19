@@ -30,6 +30,7 @@ public class Maze {
         rows = (height - 1) / 2;
         cols = (width - 1) / 2;
         range(0, rows * cols).map(i -> (1 + i / cols * 2) * width + 1 + i % cols * 2).forEach(maze::clear);
+        clearDoors();
 
         step = 2 * cols - 1;
         nodes = new BitSet(rows * cols);
@@ -70,6 +71,15 @@ public class Maze {
         return range(0, height * width)
                 .mapToObj(i -> (i % width == 0 ? "\n" : "") + (maze.get(i) ? "\u2588\u2588" : "  "))
                 .collect(Collectors.joining());
+    }
+
+    void clearDoors() {
+        maze.clear(width);
+        int door = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
+        maze.clear(door);
+        if (width % 2 == 0) {
+            maze.clear(--door);
+        }
     }
 
     class Edge {
