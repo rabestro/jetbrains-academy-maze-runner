@@ -9,5 +9,6 @@ public class Main {
         final var height = scanner.nextInt();
         final var width = scanner.nextInt();
 
+        final var maze = new Maze(height, width);
     }
 }
