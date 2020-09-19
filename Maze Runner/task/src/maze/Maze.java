@@ -51,20 +51,6 @@ public class Maze {
         generate();
     }
 
-    boolean isBorder(int edgeIndex) {
-        int[] twoNodes = getTwoNodes(edgeIndex);
-        return nodes.get(twoNodes[0]) ^ nodes.get(twoNodes[1]);
-    }
-
-    int[] getTwoNodes(int edgeIndex) {
-        final var isHorizontal = edgeIndex % step < cols - 1;
-        int row = edgeIndex / step;
-        int col = isHorizontal ? edgeIndex % step : edgeIndex % step - cols + 1;
-        int firstNodeIndex = row * cols + col;
-        int secondNodeIndex = isHorizontal ? firstNodeIndex + 1 : firstNodeIndex + cols;
-        return new int[]{firstNodeIndex, secondNodeIndex};
-    }
-
     void generate() {
         nodes.clear();
         nodes.set(0);
