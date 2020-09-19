@@ -10,5 +10,7 @@ public class Main {
         final var width = scanner.nextInt();
 
         final var maze = new Maze(height, width);
+
+        System.out.println(maze);
     }
 }
