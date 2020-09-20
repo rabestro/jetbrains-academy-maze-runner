@@ -17,7 +17,6 @@ public class Maze {
     private final int rows;
     private final int cols;
     private final int step;
-    private final BitSet nodes;
     private final Edge[] edges;
     private final BitSet maze;
 
@@ -29,40 +28,37 @@ public class Maze {
 
         rows = (height - 1) / 2;
         cols = (width - 1) / 2;
-        range(0, rows * cols).map(i -> (1 + i / cols * 2) * width + 1 + i % cols * 2).forEach(maze::clear);
         clearDoors();
 
         step = 2 * cols - 1;
-        nodes = new BitSet(rows * cols);
 
         final var random = new Random();
 
-        edges = range(0, rows * step - cols)
+        edges = range(0, 2 * cols * rows - rows - cols)
                 .mapToObj(i -> {
                     var isHorizontal = i % step < cols - 1;
-                    int row = i / step;
-                    int col = isHorizontal ? i % step : i % step - cols + 1;
-                    int nodeA = row * cols + col;
-                    int nodeB = isHorizontal ? nodeA + 1 : nodeA + cols;
-                    row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
-                    col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
+                    int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
+                    int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
+                    int mapIndex = row * width + col;
+                    int nodeA = isHorizontal ? mapIndex - 1 : mapIndex - width;
+                    int nodeB = isHorizontal ? mapIndex + 1 : mapIndex + width;
                     return new Edge(1 + random.nextInt(MAX_WEIGHT), nodeA, nodeB, row * width + col);
                 }).toArray(Edge[]::new);
 
+        maze.clear(width + 1);
         generate();
     }
 
     void generate() {
-        nodes.clear();
-        nodes.set(0);
-        while (nodes.cardinality() < rows * cols) {
+        for (int i = rows * cols; i > 1; --i) {
             var edge = Arrays.stream(edges)
                     .filter(Edge::isBorder)
                     .min(comparing(Edge::getWeight))
                     .orElseThrow();
-            nodes.set(edge.nodeA);
-            nodes.set(edge.nodeB);
+            maze.clear(edge.nodeA);
+            maze.clear(edge.nodeB);
             maze.clear(edge.mapIndex);
+
         }
     }
 
@@ -96,7 +92,7 @@ public class Maze {
         }
 
         boolean isBorder() {
-            return nodes.get(nodeA) ^ nodes.get(nodeB);
+            return maze.get(nodeA) ^ maze.get(nodeB);
         }
 
         int getWeight() {
