@@ -40,10 +40,8 @@ public class Application {
 
     private void generateMaze() {
         System.out.println("Please, enter the size of a maze");
-        final var numbers = scanner.nextLine().split(" ");
-        final var height = Integer.parseInt(numbers[0]);
-        final var width = Integer.parseInt(numbers[1]);
-        maze = new Maze(height, width).generate();
+        final var size = Integer.parseInt(scanner.nextLine());
+        maze = new Maze(size, size).generate();
         System.out.println(maze);
         enableFullMenu();
     }
