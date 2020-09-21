@@ -1,5 +1,7 @@
 package maze;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
@@ -30,6 +32,31 @@ public class Maze {
         generate();
     }
 
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public long[] getMaze() {
+        return maze.toLongArray();
+    }
+
+    public void setMaze(long[] maze) {
+        this.maze = BitSet.valueOf(maze);
+    }
+
+    @JsonIgnore
     public void generate() {
         final var random = new Random();
         final int rows = (height - 1) / 2;
@@ -37,22 +64,24 @@ public class Maze {
         final int step = 2 * cols - 1;
         final var edges = range(0, 2 * cols * rows - rows - cols)
                 .mapToObj(i -> {
-                    var isHorizontal = i % step < cols - 1;
                     int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
                     int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
-                    int mapIndex = row * width + col;
-                    int nodeA = isHorizontal ? mapIndex - 1 : mapIndex - width;
-                    int nodeB = isHorizontal ? mapIndex + 1 : mapIndex + width;
-                    return new Edge(1 + random.nextInt(MAX_WEIGHT), nodeA, nodeB, row * width + col);
+                    int edgeIndex = row * width + col;
+                    var isHorizontal = i % step < cols - 1;
+                    int dx = isHorizontal ? 1 : width;
+                    int nodeA = edgeIndex - dx;
+                    int nodeB = edgeIndex + dx;
+                    int edgeWeight = 1 + random.nextInt(MAX_WEIGHT);
+                    return new Edge(edgeWeight, nodeA, nodeB, edgeIndex);
                 }).toArray(Edge[]::new);
 
         maze.clear(width + 1);
         range(1, rows * cols)
                 .forEach(i -> Arrays.stream(edges)
-                .filter(Edge::isBorder)
-                .min(comparing(Edge::getWeight))
-                .orElseThrow()
-                .clearEdge());
+                        .filter(Edge::isBorder)
+                        .min(comparing(Edge::getWeight))
+                        .orElseThrow()
+                        .clearEdge());
 
         clearDoors();
     }
@@ -64,6 +93,7 @@ public class Maze {
                 .collect(Collectors.joining());
     }
 
+    @JsonIgnore
     void clearDoors() {
         maze.clear(width);
         int door = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
@@ -74,10 +104,10 @@ public class Maze {
     }
 
     class Edge {
+        final int edgeIndex;
         final int weight;
         final int nodeA;
         final int nodeB;
-        final int edgeIndex;
 
         Edge(int weight, int nodeA, int nodeB, int mapIndex) {
             this.weight = weight;
