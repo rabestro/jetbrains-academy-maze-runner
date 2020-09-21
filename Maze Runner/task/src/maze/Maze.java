@@ -5,12 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
-import static java.util.Comparator.reverseOrder;
 import static java.util.stream.IntStream.range;
 
 public class Maze {
@@ -76,16 +74,13 @@ public class Maze {
                     return new Edge(edgeWeight, nodeA, nodeB, edgeIndex);
                 }).toArray(Edge[]::new);
 
-        LOG.log(Level.INFO, "Edges: {0}", Arrays.toString(edges));
         maze.clear(width + 1);
-        for (int i = rows * cols; i > 1; --i) {
-            Arrays.stream(edges)
-                    .filter(Edge::isBorder)
-                    .min(comparing(Edge::getWeight))
-                    .orElseThrow()
-                    .clearEdge();
-        }
-
+        range(1, rows * cols)
+                .forEach(i -> Arrays.stream(edges)
+                        .filter(Edge::isBorder)
+                        .min(comparing(Edge::getWeight))
+                        .orElseThrow()
+                        .clearEdge());
         clearDoors();
         return this;
     }
