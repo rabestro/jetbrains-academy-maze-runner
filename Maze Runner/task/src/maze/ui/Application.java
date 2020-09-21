@@ -25,20 +25,6 @@ public class Application {
         menu.run();
     }
 
-    private void loadMaze() {
-
-    }
-
-    private void generateMaze() {
-        System.out.println("Please, enter the size of a maze");
-        final var numbers = scanner.nextLine().split(" ");
-        final var height = Integer.parseInt(numbers[0]);
-        final var width = Integer.parseInt(numbers[1]);
-        maze = new Maze(height, width).generate();
-        System.out.println(maze);
-        enableFullMenu();
-    }
-
     private void addStartMenu() {
         menu.add("Generate a new maze", this::generateMaze);
         menu.add("Load a maze", this::loadMaze);
@@ -52,15 +38,39 @@ public class Application {
         menu.addExit();
     }
 
-    private void save() {
-        System.out.println("Enter the file name:");
-        var fileName = scanner.nextLine();
-        LOG.log(Level.INFO, "Saving the maze to file: {0}", fileName);
+    private void generateMaze() {
+        System.out.println("Please, enter the size of a maze");
+        final var numbers = scanner.nextLine().split(" ");
+        final var height = Integer.parseInt(numbers[0]);
+        final var width = Integer.parseInt(numbers[1]);
+        maze = new Maze(height, width).generate();
+        System.out.println(maze);
+        enableFullMenu();
+    }
+
+    private void loadMaze() {
         try {
-            MAPPER.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), maze);
+            maze = MAPPER.readValue(askFile(), Maze.class);
+            LOG.info("The maze has loaded successful.");
+            enableFullMenu();
+        } catch (IOException error) {
+            LOG.log(Level.WARNING, "The maze has not been loaded.", error);
+        }
+    }
+
+    private void save() {
+        try {
+            MAPPER.writerWithDefaultPrettyPrinter().writeValue(askFile(), maze);
             LOG.info("The maze has saved successful.");
         } catch (IOException error) {
             LOG.log(Level.SEVERE, "Could not save the maze.", error);
         }
+    }
+
+    private File askFile() {
+        System.out.println("Enter the file name:");
+        final var fileName = scanner.nextLine();
+        LOG.log(Level.INFO, "The file name is {0}", fileName);
+        return new File(fileName);
     }
 }
