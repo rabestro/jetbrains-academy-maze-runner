@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.reverseOrder;
 import static java.util.stream.IntStream.range;
 
 public class Maze {
@@ -29,7 +31,6 @@ public class Maze {
         this.width = width;
         maze = new BitSet(height * width);
         maze.set(0, maze.size());
-        generate();
     }
 
     public int getHeight() {
@@ -57,7 +58,7 @@ public class Maze {
     }
 
     @JsonIgnore
-    public void generate() {
+    public Maze generate() {
         final var random = new Random();
         final int rows = (height - 1) / 2;
         final int cols = (width - 1) / 2;
@@ -75,15 +76,18 @@ public class Maze {
                     return new Edge(edgeWeight, nodeA, nodeB, edgeIndex);
                 }).toArray(Edge[]::new);
 
+        LOG.log(Level.INFO, "Edges: {0}", Arrays.toString(edges));
         maze.clear(width + 1);
-        range(1, rows * cols)
-                .forEach(i -> Arrays.stream(edges)
-                        .filter(Edge::isBorder)
-                        .min(comparing(Edge::getWeight))
-                        .orElseThrow()
-                        .clearEdge());
+        for (int i = rows * cols; i > 1; --i) {
+            Arrays.stream(edges)
+                    .filter(Edge::isBorder)
+                    .min(comparing(Edge::getWeight))
+                    .orElseThrow()
+                    .clearEdge();
+        }
 
         clearDoors();
+        return this;
     }
 
     @Override
@@ -109,11 +113,11 @@ public class Maze {
         final int nodeA;
         final int nodeB;
 
-        Edge(int weight, int nodeA, int nodeB, int mapIndex) {
+        Edge(int weight, int nodeA, int nodeB, int edgeIndex) {
             this.weight = weight;
             this.nodeA = nodeA;
             this.nodeB = nodeB;
-            this.edgeIndex = mapIndex;
+            this.edgeIndex = edgeIndex;
         }
 
         boolean isBorder() {
