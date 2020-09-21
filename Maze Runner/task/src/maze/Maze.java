@@ -47,15 +47,13 @@ public class Maze {
                 }).toArray(Edge[]::new);
 
         maze.clear(width + 1);
-        for (int i = rows * cols; i > 1; --i) {
-            var edge = Arrays.stream(edges)
-                    .filter(Edge::isBorder)
-                    .min(comparing(Edge::getWeight))
-                    .orElseThrow();
-            maze.clear(edge.nodeA);
-            maze.clear(edge.nodeB);
-            maze.clear(edge.mapIndex);
-        }
+        range(1, rows * cols)
+                .forEach(i -> Arrays.stream(edges)
+                .filter(Edge::isBorder)
+                .min(comparing(Edge::getWeight))
+                .orElseThrow()
+                .clearEdge());
+
         clearDoors();
     }
 
@@ -79,13 +77,13 @@ public class Maze {
         final int weight;
         final int nodeA;
         final int nodeB;
-        final int mapIndex;
+        final int edgeIndex;
 
         Edge(int weight, int nodeA, int nodeB, int mapIndex) {
             this.weight = weight;
             this.nodeA = nodeA;
             this.nodeB = nodeB;
-            this.mapIndex = mapIndex;
+            this.edgeIndex = mapIndex;
         }
 
         boolean isBorder() {
@@ -96,5 +94,10 @@ public class Maze {
             return weight;
         }
 
+        void clearEdge() {
+            maze.clear(nodeA);
+            maze.clear(nodeB);
+            maze.clear(edgeIndex);
+        }
     }
 }
