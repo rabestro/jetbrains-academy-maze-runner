@@ -9,7 +9,7 @@ import static java.text.MessageFormat.format;
 
 public class Menu implements Runnable {
 
-    protected final Map<String, MenuEntry> menu = new LinkedHashMap<>();
+    protected final LinkedHashMap<String, MenuEntry> menu = new LinkedHashMap<>();
     private final Map<Property, String> properties = new EnumMap<>(Property.class);
 
     protected boolean isOnlyOnce;
@@ -44,6 +44,10 @@ public class Menu implements Runnable {
     public Menu addExit() {
         menu.put(get(Property.EXIT_KEY), new MenuEntry(get(Property.EXIT), this::onlyOnce));
         return this;
+    }
+
+    public void clear() {
+        menu.clear();
     }
 
     @Override
