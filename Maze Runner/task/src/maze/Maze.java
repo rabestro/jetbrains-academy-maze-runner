@@ -47,15 +47,14 @@ public class Maze {
         this.width = width;
     }
 
-    public long[] getMaze() {
+    public long[] getMap() {
         return maze.toLongArray();
     }
 
-    public void setMaze(long[] maze) {
+    public void setMap(long[] maze) {
         this.maze = BitSet.valueOf(maze);
     }
 
-    @JsonIgnore
     public Maze generate() {
         final var random = new Random();
         final int rows = (height - 1) / 2;
@@ -92,7 +91,6 @@ public class Maze {
                 .collect(Collectors.joining());
     }
 
-    @JsonIgnore
     void clearDoors() {
         maze.clear(width);
         int door = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
