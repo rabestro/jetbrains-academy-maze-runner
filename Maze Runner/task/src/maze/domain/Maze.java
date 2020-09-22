@@ -7,9 +7,9 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 
 public class Maze {
@@ -85,11 +85,8 @@ public class Maze {
         final int step = 2 * cols - 1;
         final var edges = range(0, 2 * cols * rows - rows - cols)
                 .mapToObj(i -> {
-                    int row = 1 + i / step * 2
-                            + (i % step < cols - 1 ? 0 : 1);
-                    int col = i % step < cols - 1
-                            ? 2 + i % step * 2
-                            : 1 + (i % step - cols + 1) * 2;
+                    int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
+                    int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
                     int edgeIndex = row * width + col;
                     var isHorizontal = i % step < cols - 1;
                     int dx = isHorizontal ? 1 : width;
@@ -125,7 +122,7 @@ public class Maze {
     @Override
     public String toString() {
         path.clear();
-        return range(0, height * width).mapToObj(this::getCell).collect(Collectors.joining());
+        return range(0, height * width).mapToObj(this::getCell).collect(joining());
     }
 
     public boolean findPath(int index) {
@@ -150,13 +147,12 @@ public class Maze {
         path.clear();
         var isFound = findPath(start);
         LOG.log(Level.FINER, "is the path found: {0}", isFound);
-        return range(0, height * width).mapToObj(this::getCell).collect(Collectors.joining());
+        return range(0, height * width).mapToObj(this::getCell).collect(joining());
     }
 
     @JsonIgnore
     private String getCell(int index) {
         var separator = index % width == 0 ? "\n" : "";
-
         if (maze.get(index)) {
             return separator + CELL_WALL;
         }

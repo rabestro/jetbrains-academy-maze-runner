@@ -20,7 +20,7 @@ public class Application {
             .set(Menu.Property.ERROR, "Incorrect option. Please try again");
     private Maze maze;
 
-    public void startMenu() {
+    public void run() {
         addStartMenu();
         menu.addExit();
         menu.run();
