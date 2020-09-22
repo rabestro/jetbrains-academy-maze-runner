@@ -1,8 +1,11 @@
 package maze.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -11,8 +14,9 @@ import static java.util.stream.IntStream.range;
 
 public class Maze {
     private static final Logger LOG = Logger.getLogger(Maze.class.getName());
-    private static final String EMPTY_CELL = "  ";
-    private static final String FILL_CELL = "\u2588\u2588";
+    private static final String CELL_EMPTY = "  ";
+    private static final String CELL_WALL = "\u2588\u2588";
+    private static final String CELL_PATH = "//";
     private static final int MAX_WEIGHT = 10;
 
     private int height;
@@ -31,6 +35,22 @@ public class Maze {
         maze = new BitSet(height * width);
         path = new BitSet(height * width);
         maze.set(0, maze.size());
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getFinish() {
+        return finish;
+    }
+
+    public void setFinish(int finish) {
+        this.finish = finish;
     }
 
     public int getHeight() {
@@ -55,6 +75,7 @@ public class Maze {
 
     public void setMap(long[] maze) {
         this.maze = BitSet.valueOf(maze);
+        this.path = new BitSet(this.maze.size());
     }
 
     public Maze generate() {
@@ -64,15 +85,18 @@ public class Maze {
         final int step = 2 * cols - 1;
         final var edges = range(0, 2 * cols * rows - rows - cols)
                 .mapToObj(i -> {
-                    int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
-                    int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
+                    int row = 1 + i / step * 2
+                            + (i % step < cols - 1 ? 0 : 1);
+                    int col = i % step < cols - 1
+                            ? 2 + i % step * 2
+                            : 1 + (i % step - cols + 1) * 2;
                     int edgeIndex = row * width + col;
                     var isHorizontal = i % step < cols - 1;
                     int dx = isHorizontal ? 1 : width;
                     int nodeA = edgeIndex - dx;
                     int nodeB = edgeIndex + dx;
                     int edgeWeight = 1 + random.nextInt(MAX_WEIGHT);
-                    return new Edge(edgeWeight, nodeA, nodeB, edgeIndex);
+                    return new Edge(edgeIndex, edgeWeight, nodeA, nodeB);
                 }).toArray(Edge[]::new);
 
         maze.clear(width + 1);
@@ -86,21 +110,6 @@ public class Maze {
         return this;
     }
 
-    @Override
-    public String toString() {
-        return range(0, height * width)
-                .mapToObj(i -> (i % width == 0 ? "\n" : "") + (maze.get(i) ? FILL_CELL : EMPTY_CELL))
-                .collect(Collectors.joining());
-    }
-
-    public void findPath() {
-
-    }
-
-    public void printPath() {
-
-    }
-
     private void clearDoors() {
         start = width;
         finish = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
@@ -112,13 +121,58 @@ public class Maze {
         }
     }
 
+
+    @Override
+    public String toString() {
+        path.clear();
+        return range(0, height * width).mapToObj(this::getCell).collect(Collectors.joining());
+    }
+
+    public boolean findPath(int index) {
+        if (index < 0 || index >= height * width || maze.get(index) || path.get(index)) {
+            return false;
+        }
+        path.set(index);
+
+        if (index == finish
+                || findPath(index - 1)
+                || findPath(index + 1)
+                || findPath(index + width)
+                || findPath(index - width)) {
+            return true;
+        }
+        path.clear(index);
+        return false;
+    }
+
+    @JsonIgnore
+    public String getPath() {
+        path.clear();
+        var isFound = findPath(start);
+        LOG.log(Level.FINER, "is the path found: {0}", isFound);
+        return range(0, height * width).mapToObj(this::getCell).collect(Collectors.joining());
+    }
+
+    @JsonIgnore
+    private String getCell(int index) {
+        var separator = index % width == 0 ? "\n" : "";
+
+        if (maze.get(index)) {
+            return separator + CELL_WALL;
+        }
+        if (path.get(index)) {
+            return separator + CELL_PATH;
+        }
+        return separator + CELL_EMPTY;
+    }
+
     class Edge {
         final int edgeIndex;
         final int weight;
         final int nodeA;
         final int nodeB;
 
-        Edge(int weight, int nodeA, int nodeB, int edgeIndex) {
+        Edge(int edgeIndex, int weight, int nodeA, int nodeB) {
             this.weight = weight;
             this.nodeA = nodeA;
             this.nodeB = nodeB;

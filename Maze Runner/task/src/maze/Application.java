@@ -36,7 +36,7 @@ public class Application {
         addStartMenu();
         menu.add("Save the maze", this::save);
         menu.add("Display the maze", () -> System.out.println(maze));
-        menu.add("Find the escape", System.out::println);
+        menu.add("Find the escape", () -> System.out.println(maze.getPath()));
         menu.addExit();
     }
 
