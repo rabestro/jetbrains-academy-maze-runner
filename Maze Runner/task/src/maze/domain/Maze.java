@@ -1,6 +1,4 @@
-package maze;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package maze.domain;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -19,6 +17,8 @@ public class Maze {
 
     private int height;
     private int width;
+    private int start;
+    private int finish;
     private BitSet maze;
 
     public Maze() {
@@ -92,11 +92,13 @@ public class Maze {
     }
 
     void clearDoors() {
-        maze.clear(width);
-        int door = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
-        maze.clear(door);
+        start = width;
+        finish = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
+
+        maze.clear(start);
+        maze.clear(finish);
         if (width % 2 == 0) {
-            maze.clear(--door);
+            maze.clear(finish - 1);
         }
     }
 

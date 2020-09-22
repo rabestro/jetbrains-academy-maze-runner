@@ -1,8 +1,9 @@
-package maze.ui;
+package maze;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import maze.Maze;
+import maze.domain.Maze;
+import maze.ui.Menu;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ public class Application {
         addStartMenu();
         menu.add("Save the maze", this::save);
         menu.add("Display the maze", () -> System.out.println(maze));
+        menu.add("Find the escape", System.out::println);
         menu.addExit();
     }
 
