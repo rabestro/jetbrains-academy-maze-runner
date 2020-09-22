@@ -20,6 +20,7 @@ public class Maze {
     private int start;
     private int finish;
     private BitSet maze;
+    private BitSet path;
 
     public Maze() {
     }
@@ -28,6 +29,7 @@ public class Maze {
         this.height = height;
         this.width = width;
         maze = new BitSet(height * width);
+        path = new BitSet(height * width);
         maze.set(0, maze.size());
     }
 
@@ -91,7 +93,15 @@ public class Maze {
                 .collect(Collectors.joining());
     }
 
-    void clearDoors() {
+    public void findPath() {
+
+    }
+
+    public void printPath() {
+
+    }
+
+    private void clearDoors() {
         start = width;
         finish = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
 
