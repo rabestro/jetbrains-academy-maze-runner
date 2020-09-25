@@ -46,6 +46,21 @@ public class Menu implements Runnable {
         return this;
     }
 
+    public Menu disable() {
+        disable(String.valueOf(menu.size()));
+        return this;
+    }
+
+    public Menu disable(String key) {
+        menu.get(key).isEnabled = false;
+        return this;
+    }
+
+    public Menu enable(String key) {
+        menu.get(key).isEnabled = true;
+        return this;
+    }
+
     public void clear() {
         menu.clear();
     }
@@ -55,7 +70,11 @@ public class Menu implements Runnable {
         do {
             System.out.println();
             System.out.println(get(Property.TITLE));
-            menu.forEach((key, entry) -> System.out.println(format(get(Property.FORMAT), key, entry)));
+            menu.forEach((key, entry) -> {
+                if (entry.isEnabled) {
+                    System.out.println(format(get(Property.FORMAT), key, entry));
+                }
+            });
             final var key = new Scanner(System.in).nextLine().toLowerCase();
             System.out.println();
             menu.getOrDefault(key, new MenuEntry("Error",
@@ -89,6 +108,7 @@ public class Menu implements Runnable {
     protected static final class MenuEntry implements Runnable {
         private final String description;
         private final Runnable action;
+        boolean isEnabled = true;
 
         MenuEntry(final String description, final Runnable action) {
             this.description = description;

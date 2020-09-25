@@ -14,30 +14,24 @@ import java.util.logging.Logger;
 public class Application {
     private static final Logger LOG = Logger.getLogger(Application.class.getName());
     private static final ObjectMapper MAPPER = new XmlMapper();
+    private Maze maze;
 
     private final Scanner scanner = new Scanner(System.in);
     private final Menu menu = new Menu("=== Menu ===")
-            .set(Menu.Property.ERROR, "Incorrect option. Please try again");
-    private Maze maze;
+                    .add("Generate a new maze", this::generateMaze)
+                    .add("Load a maze", this::loadMaze)
+                    .add("Save the maze", this::save).disable()
+                    .add("Display the maze", this::printMaze).disable()
+                    .add("Find the escape", this::printEscape).disable()
+                    .set(Menu.Property.ERROR, "Incorrect option. Please try again")
+                    .addExit();
 
     public void run() {
-        addStartMenu();
-        menu.addExit();
         menu.run();
     }
 
-    private void addStartMenu() {
-        menu.add("Generate a new maze", this::generateMaze);
-        menu.add("Load a maze", this::loadMaze);
-    }
-
     private void enableFullMenu() {
-        menu.clear();
-        addStartMenu();
-        menu.add("Save the maze", this::save);
-        menu.add("Display the maze", () -> System.out.println(maze));
-        menu.add("Find the escape", () -> System.out.println(maze.getPath()));
-        menu.addExit();
+        menu.enable("3").enable("4").enable("5");
     }
 
     private void generateMaze() {
@@ -46,6 +40,14 @@ public class Application {
         maze = new Maze(size, size).generate();
         System.out.println(maze);
         enableFullMenu();
+    }
+
+    private void printMaze() {
+        System.out.println(maze);
+    }
+
+    private void printEscape() {
+        System.out.println(maze.getPath());
     }
 
     private void loadMaze() {
