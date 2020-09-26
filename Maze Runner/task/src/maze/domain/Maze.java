@@ -30,8 +30,8 @@ public class Maze {
     }
 
     public Maze(int height, int width) {
-        this.height = height;
-        this.width = width;
+        this.height = height % 2 == 0 ? height - 1: height;
+        this.width = width % 2 == 0 ? width - 1: width;
         maze = new BitSet(height * width);
         path = new BitSet(height * width);
         maze.set(0, maze.size());
@@ -80,10 +80,10 @@ public class Maze {
 
     public Maze generate() {
         final var random = new Random();
-        final int rows = (height - 1) / 2;
         final int cols = (width - 1) / 2;
-        final int step = 2 * cols - 1;
-        final var edges = range(0, 2 * cols * rows - rows - cols)
+        final int step = width - 2;
+        final var edgesNumber = height / 2 * (width - 2) - width / 2;
+        final var edges = range(0, edgesNumber)
                 .mapToObj(i -> {
                     int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
                     int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
@@ -97,7 +97,8 @@ public class Maze {
                 }).toArray(Edge[]::new);
 
         maze.clear(width + 1);
-        range(1, rows * cols)
+        final var cellsNumber = (height / 2) * (width / 2);
+        range(1, cellsNumber)
                 .forEach(i -> Arrays.stream(edges)
                         .filter(Edge::isBorder)
                         .min(comparing(Edge::getWeight))
@@ -113,9 +114,6 @@ public class Maze {
 
         maze.clear(start);
         maze.clear(finish);
-        if (width % 2 == 0) {
-            maze.clear(finish - 1);
-        }
     }
 
 
@@ -163,7 +161,7 @@ public class Maze {
     }
 
     class Edge {
-        final int edgeIndex;
+        final int mapIndex;
         final int weight;
         final int nodeA;
         final int nodeB;
@@ -172,7 +170,7 @@ public class Maze {
             this.weight = weight;
             this.nodeA = nodeA;
             this.nodeB = nodeB;
-            this.edgeIndex = edgeIndex;
+            this.mapIndex = edgeIndex;
         }
 
         boolean isBorder() {
@@ -186,7 +184,7 @@ public class Maze {
         void clearEdge() {
             maze.clear(nodeA);
             maze.clear(nodeB);
-            maze.clear(edgeIndex);
+            maze.clear(mapIndex);
         }
     }
 }
