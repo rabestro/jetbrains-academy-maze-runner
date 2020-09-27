@@ -159,9 +159,9 @@ public class Maze {
 
         Edge(int i) {
             final int cols = width / 2;
-            final int step = width - 2;
-            final int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
-            final int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
+            final int edgesRow = width - 2;
+            final int row = 1 + i / edgesRow * 2 + (i % edgesRow < cols - 1 ? 0 : 1);
+            final int col = i % edgesRow < cols - 1 ? 2 + i % edgesRow * 2 : 1 + (i % edgesRow - cols + 1) * 2;
             var isHorizontal = i % (width - 2) < width / 2 - 1;
             int dx = isHorizontal ? 1 : width;
 
