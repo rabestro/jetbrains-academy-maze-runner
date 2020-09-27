@@ -157,15 +157,17 @@ public class Maze {
         final int nodeA;
         final int nodeB;
 
-        Edge(int i) {
-            final int cols = width / 2;
-            final int edgesRow = width - 2;
-            final int row = 1 + i / edgesRow * 2 + (i % edgesRow < cols - 1 ? 0 : 1);
-            final int col = i % edgesRow < cols - 1 ? 2 + i % edgesRow * 2 : 1 + (i % edgesRow - cols + 1) * 2;
-            var isHorizontal = i % (width - 2) < width / 2 - 1;
-            int dx = isHorizontal ? 1 : width;
+        Edge(int edgeIndex) {
+            final int edgesInRow = width - 2;
+            final var isHorizontal = edgeIndex % edgesInRow < width / 2 - 1;
 
-            this.mapIndex = row * width + col;
+            final int mapRow = 1 + edgeIndex / edgesInRow * 2 + (isHorizontal ? 0 : 1);
+            final int mapCol = isHorizontal
+                    ? 2 + edgeIndex % edgesInRow * 2
+                    : 1 + (edgeIndex % edgesInRow - width / 2 + 1) * 2;
+
+            this.mapIndex = mapRow * width + mapCol;
+            final int dx = isHorizontal ? 1 : width;
             this.nodeA = mapIndex - dx;
             this.nodeB = mapIndex + dx;
             this.weight = 1 + RND.nextInt(MAX_WEIGHT);
