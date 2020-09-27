@@ -18,6 +18,7 @@ public class Maze {
     private static final String CELL_WALL = "\u2588\u2588";
     private static final String CELL_PATH = "//";
     private static final int MAX_WEIGHT = 10;
+    private static final Random RND = new Random();
 
     private int height;
     private int width;
@@ -30,8 +31,8 @@ public class Maze {
     }
 
     public Maze(int height, int width) {
-        this.height = height % 2 == 0 ? height - 1: height;
-        this.width = width % 2 == 0 ? width - 1: width;
+        this.height = height % 2 == 0 ? height - 1 : height;
+        this.width = width % 2 == 0 ? width - 1 : width;
         maze = new BitSet(height * width);
         path = new BitSet(height * width);
         maze.set(0, maze.size());
@@ -79,8 +80,7 @@ public class Maze {
     }
 
     public Maze generate() {
-        final var random = new Random();
-        final int cols = (width - 1) / 2;
+        final int cols = width / 2;
         final int step = width - 2;
         final var edgesNumber = height / 2 * (width - 2) - width / 2;
         final var edges = range(0, edgesNumber)
@@ -88,11 +88,11 @@ public class Maze {
                     int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
                     int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
                     int edgeIndex = row * width + col;
-                    var isHorizontal = i % step < cols - 1;
+                    var isHorizontal = i % (width - 2) < width / 2 - 1;
                     int dx = isHorizontal ? 1 : width;
                     int nodeA = edgeIndex - dx;
                     int nodeB = edgeIndex + dx;
-                    int edgeWeight = 1 + random.nextInt(MAX_WEIGHT);
+                    int edgeWeight = 1 + RND.nextInt(MAX_WEIGHT);
                     return new Edge(edgeIndex, edgeWeight, nodeA, nodeB);
                 }).toArray(Edge[]::new);
 
