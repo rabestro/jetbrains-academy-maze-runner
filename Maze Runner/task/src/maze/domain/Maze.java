@@ -80,23 +80,10 @@ public class Maze {
     }
 
     public Maze generate() {
-        final int cols = width / 2;
-        final int step = width - 2;
         final var edgesNumber = height / 2 * (width - 2) - width / 2;
-        final var edges = range(0, edgesNumber)
-                .mapToObj(i -> {
-                    int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
-                    int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
-                    int edgeIndex = row * width + col;
-                    var isHorizontal = i % (width - 2) < width / 2 - 1;
-                    int dx = isHorizontal ? 1 : width;
-                    int nodeA = edgeIndex - dx;
-                    int nodeB = edgeIndex + dx;
-                    int edgeWeight = 1 + RND.nextInt(MAX_WEIGHT);
-                    return new Edge(edgeIndex, edgeWeight, nodeA, nodeB);
-                }).toArray(Edge[]::new);
+        final var edges = range(0, edgesNumber).mapToObj(Edge::new).toArray(Edge[]::new);
 
-        maze.clear(width + 1);
+        clearFirstCell();
         final var cellsNumber = (height / 2) * (width / 2);
         range(1, cellsNumber)
                 .forEach(i -> Arrays.stream(edges)
@@ -108,8 +95,12 @@ public class Maze {
         return this;
     }
 
+    private void clearFirstCell() {
+        maze.clear(width + 1);
+    }
+
     private void clearDoors() {
-        start = width;
+        start = width  + 2 * width * RND.nextInt(height / 2);
         finish = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
 
         maze.clear(start);
@@ -166,11 +157,18 @@ public class Maze {
         final int nodeA;
         final int nodeB;
 
-        Edge(int edgeIndex, int weight, int nodeA, int nodeB) {
-            this.weight = weight;
-            this.nodeA = nodeA;
-            this.nodeB = nodeB;
-            this.mapIndex = edgeIndex;
+        Edge(int i) {
+            final int cols = width / 2;
+            final int step = width - 2;
+            final int row = 1 + i / step * 2 + (i % step < cols - 1 ? 0 : 1);
+            final int col = i % step < cols - 1 ? 2 + i % step * 2 : 1 + (i % step - cols + 1) * 2;
+            var isHorizontal = i % (width - 2) < width / 2 - 1;
+            int dx = isHorizontal ? 1 : width;
+
+            this.mapIndex = row * width + col;
+            this.nodeA = mapIndex - dx;
+            this.nodeB = mapIndex + dx;
+            this.weight = 1 + RND.nextInt(MAX_WEIGHT);
         }
 
         boolean isBorder() {
