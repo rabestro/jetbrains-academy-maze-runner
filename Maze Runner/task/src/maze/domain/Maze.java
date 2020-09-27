@@ -101,18 +101,11 @@ public class Maze {
     }
 
     private void clearDoors() {
-        start = width  + 2 * width * RND.nextInt(height / 2);
-        finish = width * (height - (height % 2 == 0 ? 2 : 1)) - 1;
+        start = width + 2 * width * RND.nextInt(height / 2);
+        finish = 2 * width * (1 + RND.nextInt(height / 2)) - 1;
 
         maze.clear(start);
         maze.clear(finish);
-    }
-
-
-    @Override
-    public String toString() {
-        path.clear();
-        return range(0, height * width).mapToObj(this::getCell).collect(joining());
     }
 
     public boolean findPath(int index) {
@@ -130,6 +123,12 @@ public class Maze {
         }
         path.clear(index);
         return false;
+    }
+
+    @Override
+    public String toString() {
+        path.clear();
+        return range(0, height * width).mapToObj(this::getCell).collect(joining());
     }
 
     @JsonIgnore
