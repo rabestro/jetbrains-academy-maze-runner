@@ -85,6 +85,7 @@ public class Maze {
 
         clearFirstCell();
         final var cellsNumber = (height / 2) * (width / 2);
+
         range(1, cellsNumber)
                 .forEach(i -> Arrays.stream(edges)
                         .filter(Edge::isBorder)
